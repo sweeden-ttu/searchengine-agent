@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Private Search Engine - Telemetry Dashboard</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        h1 { color: #569cd6; }
+        #telemetry { background: #252526; padding: 15px; border-radius: 5px; height: 600px; overflow-y: auto; }
+        .entry { margin-bottom: 10px; padding: 10px; background: #2d2d30; border-left: 3px solid #569cd6; }
+        .timestamp { color: #6a9955; font-size: 12px; }
+        .direction { font-weight: bold; color: #569cd6; }
+        .endpoint { color: #dcdcaa; }
+        .data { color: #ce9178; font-size: 12px; margin-top: 5px; }
+        button { padding: 10px 20px; background: #0e639c; color: white; border: none; cursor: pointer; margin-right: 10px; }
+        button:hover { background: #1177bb; }
+    </style>
+</head>
+<body>
+    <h1>Telemetry Dashboard</h1>
+    <div>
+        <button onclick="loadTelemetry()">Refresh</button>
+        <button onclick="clearTelemetry()">Clear Logs</button>
+        <button onclick="autoRefresh = !autoRefresh">Auto Refresh: <span id="autoStatus">OFF</span></button>
+    </div>
+    <div id="telemetry"></div>
+
+    <script>
+        let autoRefresh = false;
+        let intervalId = null;
+
+        async function loadTelemetry() {
+            const res = await fetch('http://localhost:3000/telemetry');
+            const data = await res.json();
+            
+            const div = document.getElementById('telemetry');
+            if (data.logs.length === 0) {
+                div.innerHTML = '<p>No telemetry data yet. Use the extension to generate calls.</p>';
+                return;
+            }
+            
+            div.innerHTML = `<h3>Total Calls: ${data.count}</h3>` + 
+                data.logs.reverse().map(entry => `
+                    <div class="entry">
+                        <div class="timestamp">${entry.timestamp}</div>
+                        <div><span class="direction">${entry.direction}</span> | 
+                             <span class="endpoint">${entry.source} -> ${entry.target} | ${entry.endpoint}</span></div>
+                        ${entry.data ? `<div class="data">${JSON.stringify(entry.data, null, 2)}</div>` : ''}
+                    </div>
+                `).join('');
+        }
+
+        async function clearTelemetry() {
+            await fetch('http://localhost:3000/telemetry', { method: 'DELETE' });
+            loadTelemetry();
+        }
+
+        // Auto refresh
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            document.getElementById('autoStatus').textContent = autoRefresh ? 'ON' : 'OFF';
+            if (autoRefresh) {
+                intervalId = setInterval(loadTelemetry, 2000);
+            } else {
+                clearInterval(intervalId);
+            }
+        }
+
+        // Load on start
+        loadTelemetry();
+    </script>
+</body>
+</html>
