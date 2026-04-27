@@ -10,6 +10,46 @@ const DATA_DIR = path.join(__dirname, 'crawled-data');
 let searchIndex = null;
 let indexedDocs = [];
 
+// Telemetry logging
+const telemetryLog = [];
+function logTelemetry(direction, source, target, endpoint, data = null) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    direction,
+    source,
+    target,
+    endpoint,
+    data: data ? JSON.parse(JSON.stringify(data)) : null
+  };
+  telemetryLog.push(entry);
+  console.log(`[TELEMETRY] ${entry.timestamp} | ${direction} | ${source} -> ${target} | ${endpoint}`, data ? JSON.stringify(data).slice(0, 200) : '');
+}
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  // Log incoming request
+  logTelemetry('REQUEST', 'extension', 'server', req.url, {
+    method: req.method,
+    body: req.method === 'POST' ? req.body : null
+  });
+
+  // Capture response
+  const originalSend = res.send;
+  res.send = function(body) {
+    const duration = Date.now() - start;
+    logTelemetry('RESPONSE', 'server', 'extension', req.url, {
+      status: res.statusCode,
+      duration: `${duration}ms`,
+      body: body ? JSON.parse(JSON.stringify(body)).slice(0, 200) : null
+    });
+    return originalSend.call(this, body);
+  };
+
+  next();
+});
+
 app.use(bodyParser.json({ limit: '10mb' }));
 
 function initIndex() {

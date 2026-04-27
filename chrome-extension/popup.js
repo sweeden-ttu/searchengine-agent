@@ -9,21 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let selectedSearchBoxSelector = null;
 
+  // Telemetry logging for extension
+  function logTelemetry(action, data = null) {
+    const timestamp = new Date().toISOString();
+    console.log(`[EXTENSION TELEMETRY] ${timestamp} | ${action}`, data ? JSON.stringify(data).slice(0, 200) : '');
+  }
+
   extractBtn.addEventListener('click', async () => {
     extractStatus.textContent = 'Extracting...';
+    logTelemetry('EXTRACT_PAGE_CLICK');
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await chrome.tabs.sendMessage(tab.id, { action: 'extractPage' });
-    await fetch('http://localhost:3000/save-markdown', {
+    logTelemetry('PAGE_EXTRACTED', { title: response.title, url: response.url });
+    
+    const payload = {
+      markdown: response.markdown,
+      url: response.url,
+      title: response.title,
+      searchTerm: 'manual-extract',
+      timestamp: new Date().toISOString()
+    };
+    
+    logTelemetry('SENDING_TO_SERVER', { endpoint: '/save-markdown', title: response.title });
+    const result = await fetch('http://localhost:3000/save-markdown', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        markdown: response.markdown,
-        url: response.url,
-        title: response.title,
-        searchTerm: 'manual-extract',
-        timestamp: new Date().toISOString()
-      })
+      body: JSON.stringify(payload)
     });
+    logTelemetry('SERVER_RESPONSE', { status: result.status, ok: result.ok });
+    
     extractStatus.textContent = 'Saved to local server!';
   });
 
