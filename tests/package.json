@@ -1,0 +1,14 @@
+{
+  "name": "private-search-engine-tests",
+  "version": "1.0.0",
+  "description": "Selenium UI tests for Private Search Engine Chrome extension",
+  "scripts": {
+    "test": "mocha test/*.test.js"
+  },
+  "dependencies": {
+    "chai": "^4.5.0",
+    "chromedriver": "^147.0.4",
+    "mocha": "^10.7.0",
+    "selenium-webdriver": "^4.25.0"
+  }
+}
