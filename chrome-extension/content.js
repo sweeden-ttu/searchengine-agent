@@ -12,8 +12,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.action === 'startSelectSearchBox') {
     const clickHandler = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
       const selector = getSelector(e.target);
       chrome.runtime.sendMessage({ action: 'searchBoxSelected', selector });
       document.removeEventListener('click', clickHandler, true);
