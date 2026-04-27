@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Search Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .search-box { width: 500px; padding: 10px; font-size: 16px; }
+        .search-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        .results { margin-top: 30px; }
+        .result-item { margin-bottom: 20px; }
+        .result-title { font-size: 18px; color: #1a0dab; cursor: pointer; }
+        .result-url { color: #006621; font-size: 14px; }
+        .result-snippet { color: #545454; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>Private Search Engine - Test Page</h1>
+    
+    <form id="searchForm" onsubmit="performSearch(event)">
+        <input type="text" id="searchInput" class="search-box" placeholder="Enter search terms..." />
+        <button type="submit" class="search-btn">Search</button>
+    </form>
+
+    <div id="results" class="results" style="display:none;">
+        <div class="result-item">
+            <div class="result-title" onclick="window.open('https://example.com', '_blank')">Example Domain</div>
+            <div class="result-url">https://example.com</div>
+            <div class="result-snippet">This domain is for use in illustrative examples in documents.</div>
+        </div>
+        <div class="result-item">
+            <div class="result-title" onclick="window.open('https://www.wikipedia.org', '_blank')">Wikipedia</div>
+            <div class="result-url">https://www.wikipedia.org</div>
+            <div class="result-snippet">Wikipedia is a free online encyclopedia.</div>
+        </div>
+        <div class="result-item">
+            <div class="result-title" onclick="window.open('https://developer.mozilla.org', '_blank')">MDN Web Docs</div>
+            <div class="result-url">https://developer.mozilla.org</div>
+            <div class="result-snippet">Resources for developers, by developers.</div>
+        </div>
+        <div class="result-item">
+            <div class="result-title" onclick="window.open('https://github.com', '_blank')">GitHub</div>
+            <div class="result-url">https://github.com</div>
+            <div class="result-snippet">GitHub is where the world builds software.</div>
+        </div>
+        <div class="result-item">
+            <div class="result-title" onclick="window.open('https://stackoverflow.com', '_blank')">Stack Overflow</div>
+            <div class="result-url">https://stackoverflow.com</div>
+            <div class="result-snippet">Stack Overflow is the largest online community for programmers.</div>
+        </div>
+    </div>
+
+    <script>
+        function performSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchInput').value;
+            if (query.trim()) {
+                document.getElementById('results').style.display = 'block';
+                document.querySelector('h1').textContent = 'Search Results for: ' + query;
+            }
+            return false;
+        }
+
+        // Simulate search results page (for testing crawl)
+        function showSearchResults(term) {
+            document.getElementById('searchInput').value = term;
+            performSearch(new Event('submit'));
+        }
+
+        // For extension to detect search box
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            console.log('Search input:', e.target.value);
+        });
+    </script>
+</body>
+</html>
