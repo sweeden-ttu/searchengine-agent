@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Private Search Engine",
+  "version": "1.0.0",
+  "description": "Extract web pages to markdown, crawl/index locally with Google ADK",
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "host_permissions": ["<all_urls>", "http://localhost:3000/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {"16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png"}
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["lib/turndown.js", "content.js"],
+    "run_at": "document_end"
+  }],
+  "background": {"service_worker": "background.js"}
+}

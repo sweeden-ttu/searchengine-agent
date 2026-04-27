@@ -1,0 +1,8 @@
+node_modules/
+*.log
+*.DS_Store
+server/crawled-data/
+chrome-extension/icons/*.png
+.env
+__pycache__/
+*.pyc
