@@ -53,12 +53,6 @@ app.use((req, res, next) => {
 app.use(bodyParser.json({ limit: '10mb' }));
 
 function initIndex() {
-  searchIndex = lunr(function() {
-    this.field('title', { boost: 10 });
-    this.field('content');
-    this.field('url');
-    this.ref('id');
-  });
   indexedDocs = [];
   
   function walkDir(dir, fileList = []) {
@@ -76,22 +70,35 @@ function initIndex() {
   
   try {
     const files = walkDir(DATA_DIR);
-    files.forEach((file, i) => {
-      const content = fs.readFileSync(file, 'utf8');
-      const metaPath = file.replace('.md', '.json');
-      const meta = fs.readJsonSync(metaPath, { throws: false }) || {};
-      const doc = { 
-        id: i, 
-        title: meta.title || path.basename(file), 
-        content, 
-        url: meta.url || '', 
-        searchTerm: meta.searchTerm || '' 
-      };
-      searchIndex.add(doc);
-      indexedDocs.push(doc);
-    });
-    console.log(`Indexed ${files.length} documents`);
+    if (files.length > 0) {
+      searchIndex = lunr(function() {
+        this.field('title', { boost: 10 });
+        this.field('content');
+        this.field('url');
+        this.ref('id');
+        
+        files.forEach((file, i) => {
+          const content = fs.readFileSync(file, 'utf8');
+          const metaPath = file.replace('.md', '.json');
+          const meta = fs.readJsonSync(metaPath, { throws: false }) || {};
+          const doc = { 
+            id: i, 
+            title: meta.title || path.basename(file), 
+            content, 
+            url: meta.url || '', 
+            searchTerm: meta.searchTerm || '' 
+          };
+          this.add(doc);
+          indexedDocs.push(doc);
+        });
+      });
+      console.log(`Indexed ${files.length} documents`);
+    } else {
+      searchIndex = null;
+      console.log('No existing data to index');
+    }
   } catch (e) {
+    searchIndex = null;
     console.log('No existing data to index');
   }
 }
